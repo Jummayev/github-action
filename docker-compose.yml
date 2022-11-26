@@ -1,0 +1,35 @@
+version: "3.3"
+
+services:
+
+  redis:
+    image: redis:latest
+    container_name: ${APP_NAME}-redis
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: ${APP_NAME}-postgres-13
+    restart: always
+    volumes:
+      - "./sourcefiles/postgres:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=crud
+    ports:
+      - "4321:5432"
+
+  nginx:
+    image: nginx:alpine
+    container_name: ${APP_NAME}-webserver
+    volumes:
+      - ../crud:/var/www/html/crud
+      - ./docker/nginx:/etc/nginx/conf.d
+    ports:
+      - "8090:80"
+  php-fpm:
+    image: phpdockerio/php:7.4-fpm
+    container_name: ${APP_NAME}-php-fpm
+    volumes:
+      - ../crud:/var/www/html/crud
+      - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
